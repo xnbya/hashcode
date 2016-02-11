@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define maxitems 10000
+#define maxdrone 1000
+#define maxorder 1000
+
+struct drone {
+	int x;
+	int y;
+	int items[maxdrone];
+	int inTransit;
+	int load;
+};
+
+struct warehouse {
+	int items[maxitems];
+	int x;
+	int y;
+	int count;
+};
+
+struct orders {
+	int x;
+	int y;
+	int items[maxorder];
+	int count;
+	int delivered;
+};
+
+
+int main() {
+	FILE * fp;
+	fp = fopen("test.in", "r+");
+	int j, rows, columns, drones, turns, maxPayload, pTypes, warehouses, numorders, i;
+	fscanf(fp, "%d %d %d %d %d %d", &rows, &columns, &drones, &turns, &maxPayload, &pTypes);
+        //load product types	
+	int products[pTypes];
+	for(i = 0; i < pTypes; i++) {
+		fscanf(fp, "%d", &products[i]);
+	}
+	//printf("p15 %d pTypes %d drones %d \n", products[15], pTypes, drones);
+	//
+	fscanf(fp, "%d", &warehouses);
+	struct warehouse whs[warehouses];
+	for(i = 0; i < warehouses; i++) {
+		fscanf(fp, "%d %d", &whs[i].x, &whs[i].y);
+		for(j = 0; j < pTypes; j++) {
+		       fscanf(fp, "%d", &whs[i].items[j]);
+		}
+	}
+	//printf("ware %d \n", warehouses);
+	//orders
+	fscanf(fp, "%d", &numorders);
+	struct orders odr[numorders];
+	for(i = 0; i < numorders; i++) {
+		fscanf(fp, "%d %d %d", &odr[i].x, &odr[i].y, &odr[i].count);
+		for(j = 0; j < odr[i].count; j++) {
+		       fscanf(fp, "%d", &odr[i].items[j]);
+		}
+	}	
+	//printf("%d warehses, %d ords \n", warehouses, numorders);
+	
+	//deliver stuff
+	int commd = 0;
+	int Cdrone = 0;
+	int k;
+	int commands = 0;
+	char *buffer = malloc(100000);
+	buffer[0] = '\n';
+	
+	for(i = 0; i < numorders; i++) {
+		int size = 0;
+		int cord[maxorder];
+		for(j = 0; j < maxorder; j++) {
+			cord[j] = 0;
+		}
+		for(j = 0; j < odr[i].count; j++) {
+			size += products[odr[i].items[j]];
+			cord[odr[i].items[j]]++;
+		}
+		if(size < maxPayload) {
+		//	printf("%d weighs %d \n", i, size);
+			char *deliv = malloc(1000);
+			deliv[0] = '\0';
+			for(j = 0; j < maxorder; j++) {
+				if(cord[j] > 0) {
+					sprintf(buffer + strlen(buffer), "%d L 0 %d %d\n", Cdrone, j, cord[j]);
+					sprintf(deliv + strlen(deliv), "%d D %d %d %d\n", Cdrone, i, j, cord[j]);
+					commands += 2
+				}
+			}
+			sprintf(buffer + strlen(buffer), "%s", deliv);
+			Cdrone = (Cdrone + 1) % drones;
+		}
+	}
+	printf("%d", commands);
+	printf("%s", buffer);
+	
+
+	return 0;
+}
+
+
