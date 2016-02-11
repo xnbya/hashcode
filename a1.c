@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #define maxitems 10000
-#define maxdrone 1000
+#define maxdrone 2000
 #define maxorder 1000
 
 struct drone {
@@ -67,9 +67,11 @@ int main() {
 	int Cdrone = 0;
 	int k;
 	int commands = 0;
-	char *buffer = malloc(100000);
+	char *buffer = malloc(1000000);
 	buffer[0] = '\n';
-	
+
+	char *buffer2 = malloc(1000000);
+	buffer2[0] = '\n';
 	for(i = 0; i < numorders; i++) {
 		int size = 0;
 		int cord[maxorder];
@@ -94,10 +96,41 @@ int main() {
 			sprintf(buffer + strlen(buffer), "%s", deliv);
 			Cdrone = (Cdrone + 1) % drones;
 		}
+		else {
+		int size = 0;
+		int cord[maxorder];
+		for(j = 0; j < maxorder; j++) {
+			cord[j] = 0;
+		}
+		for(j = 0; j < odr[i].count; j++) {
+			if(odr[i].items[j] != -1 && (size + products[odr[i].items[j]]) < maxPayload) {
+				size += products[odr[i].items[j]];
+				cord[odr[i].items[j]]++;
+				odr[i].items[j] = -1;
+			}
+		}
+		if(size < maxPayload) {
+			//	printf("%d weighs %d \n", i, size);
+			char *deliv = malloc(100000);
+			deliv[0] = '\0';
+			for(j = 0; j < maxorder; j++) {
+				if(cord[j] > 0) {
+					sprintf(buffer2 + strlen(buffer2), "%d L 0 %d %d\n", Cdrone, j, cord[j]);
+					sprintf(deliv + strlen(deliv), "%d D %d %d %d\n", Cdrone, i, j, cord[j]);
+					commands += 2;
+				}
+			}
+			sprintf(buffer2 + strlen(buffer2), "%s", deliv);
+			Cdrone = (Cdrone + 1) % drones;
+		} }
+
+
 	}
 	printf("%d", commands);
 	printf("%s", buffer);
-	
+	printf("%s", buffer2);
+
+
 
 	return 0;
 }
